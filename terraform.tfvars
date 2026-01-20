@@ -8,8 +8,8 @@ pg_subnet_prefixes = ["10.10.2.0/24"]
 private_dns_zone_name = "privatelink.postgres.database.azure.com"
 
 server_name = "utk-prod-pgflex-001"  # globally unique
-administrator_login    = "pgadmin"
-administrator_password = "lib1234"
+administrator_login    = ""
+administrator_password = ""
 
 postgres_version = "16"
 sku_name         = "GP_Standard_D2s_v3"
