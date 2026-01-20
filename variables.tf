@@ -1,11 +1,19 @@
+/* =========================
+   EXISTING RG + VNET
+   ========================= */
 variable "resource_group_name" {
   type        = string
-  description = "Single resource group for all resources."
-  default     = "rg-pgflex"
+  description = "Pre-existing resource group name."
+}
+
+variable "vnet_name" {
+  type        = string
+  description = "Pre-existing VNet name (in the same RG)."
 }
 
 variable "location" {
   type        = string
+  description = "Azure region (must match the RG region)."
   default     = "eastus"
 }
 
@@ -14,34 +22,32 @@ variable "tags" {
   default = {}
 }
 
-/* ================= NETWORK ================= */
-variable "vnet_name" {
-  type    = string
-  default = "vnet-dev"
-}
-
-variable "vnet_address_space" {
-  type    = list(string)
-  default = ["10.10.0.0/16"]
-}
-
+/* =========================
+   CREATE SUBNET (DELEGATED)
+   ========================= */
 variable "pg_subnet_name" {
-  type    = string
-  default = "snet-pgflex"
+  type        = string
+  description = "Name of the subnet to create for PostgreSQL Flexible Server."
+  default     = "snet-pgflex"
 }
 
 variable "pg_subnet_prefixes" {
-  type    = list(string)
-  default = ["10.10.2.0/24"]
+  type        = list(string)
+  description = "CIDR(s) for the new delegated subnet (must not overlap existing subnets)."
 }
 
-/* ================= DNS ================= */
+/* =========================
+   PRIVATE DNS (CREATE)
+   ========================= */
 variable "private_dns_zone_name" {
-  type    = string
-  default = "privatelink.postgres.database.azure.com"
+  type        = string
+  description = "Private DNS zone name for Postgres private access."
+  default     = "privatelink.postgres.database.azure.com"
 }
 
-/* ================= POSTGRES ================= */
+/* =========================
+   POSTGRES FLEXIBLE SERVER
+   ========================= */
 variable "server_name" {
   type        = string
   description = "PostgreSQL Flexible Server name (globally unique)."
@@ -92,7 +98,9 @@ variable "zone" {
   default = null
 }
 
-/* ================= PARAMETERS ================= */
+/* =========================
+   SERVER PARAMETERS
+   ========================= */
 variable "server_parameters" {
   type    = map(string)
   default = {}
