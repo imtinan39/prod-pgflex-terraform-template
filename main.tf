@@ -1,24 +1,19 @@
-/* ============ RESOURCE GROUP ============ */
-resource "azurerm_resource_group" "rg" {
-  name     = var.resource_group_name
-  location = var.location
-  tags     = var.tags
+/* ============ EXISTING RESOURCE GROUP ============ */
+data "azurerm_resource_group" "rg" {
+  name = var.resource_group_name
 }
 
-/* ============ VNET ============ */
-resource "azurerm_virtual_network" "vnet" {
+/* ============ EXISTING VNET ============ */
+data "azurerm_virtual_network" "vnet" {
   name                = var.vnet_name
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  address_space       = var.vnet_address_space
-  tags                = var.tags
+  resource_group_name = var.resource_group_name
 }
 
-/* ============ DELEGATED SUBNET ============ */
+/* ============ CREATE DELEGATED SUBNET ============ */
 resource "azurerm_subnet" "pgflex" {
   name                 = var.pg_subnet_name
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.vnet.name
   address_prefixes     = var.pg_subnet_prefixes
 
   delegation {
@@ -33,27 +28,28 @@ resource "azurerm_subnet" "pgflex" {
   }
 }
 
-/* ============ PRIVATE DNS ============ */
+/* ============ CREATE PRIVATE DNS ZONE ============ */
 resource "azurerm_private_dns_zone" "pg" {
   name                = var.private_dns_zone_name
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = var.resource_group_name
   tags                = var.tags
 }
 
+/* ============ LINK DNS ZONE TO EXISTING VNET ============ */
 resource "azurerm_private_dns_zone_virtual_network_link" "pg_link" {
   name                  = "${var.vnet_name}-pgflex-dns-link"
-  resource_group_name   = azurerm_resource_group.rg.name
+  resource_group_name   = var.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.pg.name
-  virtual_network_id    = azurerm_virtual_network.vnet.id
+  virtual_network_id    = data.azurerm_virtual_network.vnet.id
   registration_enabled  = false
   tags                  = var.tags
 }
 
-/* ============ POSTGRES FLEXIBLE SERVER ============ */
+/* ============ CREATE POSTGRES FLEXIBLE SERVER (PRIVATE) ============ */
 resource "azurerm_postgresql_flexible_server" "pg" {
   name                = var.server_name
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+  location            = var.location
+  resource_group_name = var.resource_group_name
 
   administrator_login    = var.administrator_login
   administrator_password = var.administrator_password
@@ -79,7 +75,7 @@ resource "azurerm_postgresql_flexible_server" "pg" {
   ]
 }
 
-/* ============ SERVER PARAMETERS ============ */
+/* ============ SERVER PARAMETERS (OPTIONAL) ============ */
 resource "azurerm_postgresql_flexible_server_configuration" "params" {
   for_each  = var.server_parameters
   name      = each.key
