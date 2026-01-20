@@ -1,6 +1,6 @@
 resource_group_name = "rg-prod-pgflex"
-vnet_name           = "vnet-prod"
-location            = "eastus"
+vnet_name           = "practice"
+location            = "westus"
 
 pg_subnet_name     = "snet-prod-pgflex"
 pg_subnet_prefixes = ["10.10.2.0/24"]
@@ -9,7 +9,7 @@ private_dns_zone_name = "privatelink.postgres.database.azure.com"
 
 server_name = "utk-prod-pgflex-001"  # globally unique
 administrator_login    = "pgadmin"
-administrator_password = "REPLACE_WITH_STRONG_PASSWORD"
+administrator_password = "lib1234"
 
 postgres_version = "16"
 sku_name         = "GP_Standard_D2s_v3"
